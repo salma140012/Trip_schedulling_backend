@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+
+spec:
+  selector:
+    matchLabels:
+      app: trip-scheduling-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trip-scheduling-backend
+    spec:
+      containers:
+        - name: tools-trip-scheduling
+          image: docker.io/salma141200/backend-image:latest
+          ports:
+            - containerPort: 8080
+          env: 
+            - name: MYSQL_HOST # Setting mysql host env in application.properties with DB pod cluster ip
+              value: 172.30.56.84
+            - name: MYSQL_USER # Setting Database user name from configMap
+              value: userroot
+            - name: MYSQL_PASSWORD # Setting Database user password from configMap
+              value: root
+            - name: MYSQL_PORT # Setting mysql_port env in application.properties to port of db pod
+              value: '3306'
+           
+---
+apiVersion: v1 
+kind: Service # kind of resource
+metadata: 
+  name: backend-service
+spec:
+  selector:
+    app: trip-scheduling-backend
+
+  ports:
+    - protocol: "TCP"
+      port: 8080 #service port in cluster
+      targetPort: 8080 # port of service that's going to be exposed
+
